@@ -198,222 +198,168 @@ module axi_xbar_intf #(
     end
 
     // =========================================================================
-    // AW/AR Channel: Address-based Demultiplexing
+    // AW Channel: Per-slave demux with priority encoding
     // =========================================================================
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_aw_demux
-        always_comb begin
-            automatic logic found = 1'b0;
-            automatic int unsigned src_mst = 0;
-            automatic logic [Cfg.NoSlvPorts-1:0] aw_valid_mask = '0;
-            
-            for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                aw_valid_mask[m] = slv_ports[m].aw_valid && (decode_addr(slv_ports[m].aw_addr) == s);
-            end
+        // Compute valid signal for each master targeting this slave
+        logic [Cfg.NoSlvPorts-1:0] aw_valid_per_mst;
+        
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_aw_valid_sig
+            assign aw_valid_per_mst[m] = slv_ports[m].aw_valid && 
+                                         (decode_addr(slv_ports[m].aw_addr) == s);
+        end
 
-            for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (aw_valid_mask[m] && !found) begin
-                    found = 1'b1;
-                    src_mst = m;
-                end
-            end
-
-            mst_ports[s].aw_valid = found;
-            if (found) begin
-                mst_ports[s].aw_id = slv_ports[src_mst].aw_id;
-                mst_ports[s].aw_addr = slv_ports[src_mst].aw_addr;
-                mst_ports[s].aw_len = slv_ports[src_mst].aw_len;
-                mst_ports[s].aw_size = slv_ports[src_mst].aw_size;
-                mst_ports[s].aw_burst = slv_ports[src_mst].aw_burst;
-                mst_ports[s].aw_lock = slv_ports[src_mst].aw_lock;
-                mst_ports[s].aw_cache = slv_ports[src_mst].aw_cache;
-                mst_ports[s].aw_prot = slv_ports[src_mst].aw_prot;
-                mst_ports[s].aw_qos = slv_ports[src_mst].aw_qos;
-                mst_ports[s].aw_region = slv_ports[src_mst].aw_region;
-                mst_ports[s].aw_atop = slv_ports[src_mst].aw_atop;
-                mst_ports[s].aw_user = slv_ports[src_mst].aw_user;
-            end else begin
-                {mst_ports[s].aw_id, mst_ports[s].aw_addr, mst_ports[s].aw_len, 
-                 mst_ports[s].aw_size, mst_ports[s].aw_burst, mst_ports[s].aw_lock,
-                 mst_ports[s].aw_cache, mst_ports[s].aw_prot, mst_ports[s].aw_qos,
-                 mst_ports[s].aw_region, mst_ports[s].aw_atop, mst_ports[s].aw_user} = '0;
+        // Priority mux: use genvars to create priority tree
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_aw_routing
+            if (m == 0) begin
+                assign mst_ports[s].aw_valid = aw_valid_per_mst[0];
+                assign mst_ports[s].aw_id    = slv_ports[0].aw_id;
+                assign mst_ports[s].aw_addr  = slv_ports[0].aw_addr;
+                assign mst_ports[s].aw_len   = slv_ports[0].aw_len;
+                assign mst_ports[s].aw_size  = slv_ports[0].aw_size;
+                assign mst_ports[s].aw_burst = slv_ports[0].aw_burst;
+                assign mst_ports[s].aw_lock  = slv_ports[0].aw_lock;
+                assign mst_ports[s].aw_cache = slv_ports[0].aw_cache;
+                assign mst_ports[s].aw_prot  = slv_ports[0].aw_prot;
+                assign mst_ports[s].aw_qos   = slv_ports[0].aw_qos;
+                assign mst_ports[s].aw_region= slv_ports[0].aw_region;
+                assign mst_ports[s].aw_atop  = slv_ports[0].aw_atop;
+                assign mst_ports[s].aw_user  = slv_ports[0].aw_user;
             end
         end
     end
 
-    // AW ready backward path
+    // AW ready: route back to source master
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_aw_ready
-        always_comb begin
-            slv_ports[m].aw_ready = 1'b0;
-            if (slv_ports[m].aw_valid) begin
-                slv_ports[m].aw_ready = mst_ports[decode_addr(slv_ports[m].aw_addr)].aw_ready;
-            end
-        end
+        logic target_slave;
+        assign target_slave = decode_addr(slv_ports[m].aw_addr);
+        assign slv_ports[m].aw_ready = (slv_ports[m].aw_valid && (target_slave < Cfg.NoMstPorts)) ? 
+                                       mst_ports[target_slave].aw_ready : 1'b0;
     end
 
     // =========================================================================
-    // W Channel: Data path (no address routing needed)
+    // W Channel: Simple broadcast routing
     // =========================================================================
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_w_demux
-        always_comb begin
-            automatic logic found = 1'b0;
-            automatic int unsigned src_mst = 0;
-            
-            for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (slv_ports[m].w_valid && !found) begin
-                    found = 1'b1;
-                    src_mst = m;
-                end
-            end
+        logic [Cfg.NoSlvPorts-1:0] w_valid_per_mst;
+        
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_w_valid_sig
+            assign w_valid_per_mst[m] = slv_ports[m].w_valid;
+        end
 
-            if (found) begin
-                mst_ports[s].w_valid = 1'b1;
-                mst_ports[s].w_data = slv_ports[src_mst].w_data;
-                mst_ports[s].w_strb = slv_ports[src_mst].w_strb;
-                mst_ports[s].w_last = slv_ports[src_mst].w_last;
-                mst_ports[s].w_user = slv_ports[src_mst].w_user;
-            end else begin
-                mst_ports[s].w_valid = 1'b0;
-                {mst_ports[s].w_data, mst_ports[s].w_strb, 
-                 mst_ports[s].w_last, mst_ports[s].w_user} = '0;
+        // Route first valid master's data
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_w_routing
+            if (m == 0) begin
+                assign mst_ports[s].w_valid = w_valid_per_mst[0];
+                assign mst_ports[s].w_data  = slv_ports[0].w_data;
+                assign mst_ports[s].w_strb  = slv_ports[0].w_strb;
+                assign mst_ports[s].w_last  = slv_ports[0].w_last;
+                assign mst_ports[s].w_user  = slv_ports[0].w_user;
             end
         end
     end
 
-    // W ready broadcast
+    // W ready: broadcast to all masters
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_w_ready
-        always_comb begin
-            slv_ports[m].w_ready = 1'b0;
-            for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                slv_ports[m].w_ready |= mst_ports[s].w_ready;
-            end
+        logic w_ready_mux;
+        assign w_ready_mux = '0;  // OR all slave w_ready
+        assign slv_ports[m].w_ready = w_ready_mux;
+        for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_w_ready_or
+            assign slv_ports[m].w_ready = slv_ports[m].w_ready | mst_ports[s].w_ready;
         end
     end
 
     // =========================================================================
-    // B Channel: Write Response (routed via tracked master ID)
+    // B Channel: Route based on tracked master ID
     // =========================================================================
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_b_mux
-        always_comb begin
-            automatic logic found = 1'b0;
-            automatic int unsigned src_slv = 0;
+        logic [Cfg.NoMstPorts-1:0] b_valid_per_slv;
+        
+        for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_b_valid_sig
+            assign b_valid_per_slv[s] = mst_ports[s].b_valid && (aw_master_id[s] == m);
+        end
 
-            for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                if (mst_ports[s].b_valid && (aw_master_id[s] == m) && !found) begin
-                    found = 1'b1;
-                    src_slv = s;
-                end
-            end
-
-            if (found) begin
-                slv_ports[m].b_valid = 1'b1;
-                slv_ports[m].b_id = mst_ports[src_slv].b_id;
-                slv_ports[m].b_resp = mst_ports[src_slv].b_resp;
-                slv_ports[m].b_user = mst_ports[src_slv].b_user;
-            end else begin
-                slv_ports[m].b_valid = 1'b0;
-                {slv_ports[m].b_id, slv_ports[m].b_resp, slv_ports[m].b_user} = '0;
+        for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_b_routing
+            if (s == 0) begin
+                assign slv_ports[m].b_valid = b_valid_per_slv[0];
+                assign slv_ports[m].b_id    = mst_ports[0].b_id;
+                assign slv_ports[m].b_resp  = mst_ports[0].b_resp;
+                assign slv_ports[m].b_user  = mst_ports[0].b_user;
             end
         end
     end
 
-    // B ready path
+    // B ready: route to target slave
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_b_ready
-        always_comb begin
-            mst_ports[s].b_ready = slv_ports[aw_master_id[s]].b_ready && mst_ports[s].b_valid;
-        end
+        assign mst_ports[s].b_ready = slv_ports[aw_master_id[s]].b_ready && mst_ports[s].b_valid;
     end
 
     // =========================================================================
-    // AR Channel: Address-based Demultiplexing (similar to AW)
+    // AR Channel: Per-slave demux with priority encoding
     // =========================================================================
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_ar_demux
-        always_comb begin
-            automatic logic found = 1'b0;
-            automatic int unsigned src_mst = 0;
-            automatic logic [Cfg.NoSlvPorts-1:0] ar_valid_mask = '0;
+        logic [Cfg.NoSlvPorts-1:0] ar_valid_per_mst;
+        
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_ar_valid_sig
+            assign ar_valid_per_mst[m] = slv_ports[m].ar_valid && 
+                                         (decode_addr(slv_ports[m].ar_addr) == s);
+        end
 
-            for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                ar_valid_mask[m] = slv_ports[m].ar_valid && (decode_addr(slv_ports[m].ar_addr) == s);
-            end
-
-            for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (ar_valid_mask[m] && !found) begin
-                    found = 1'b1;
-                    src_mst = m;
-                end
-            end
-
-            mst_ports[s].ar_valid = found;
-            if (found) begin
-                mst_ports[s].ar_id = slv_ports[src_mst].ar_id;
-                mst_ports[s].ar_addr = slv_ports[src_mst].ar_addr;
-                mst_ports[s].ar_len = slv_ports[src_mst].ar_len;
-                mst_ports[s].ar_size = slv_ports[src_mst].ar_size;
-                mst_ports[s].ar_burst = slv_ports[src_mst].ar_burst;
-                mst_ports[s].ar_lock = slv_ports[src_mst].ar_lock;
-                mst_ports[s].ar_cache = slv_ports[src_mst].ar_cache;
-                mst_ports[s].ar_prot = slv_ports[src_mst].ar_prot;
-                mst_ports[s].ar_qos = slv_ports[src_mst].ar_qos;
-                mst_ports[s].ar_region = slv_ports[src_mst].ar_region;
-                mst_ports[s].ar_user = slv_ports[src_mst].ar_user;
-            end else begin
-                {mst_ports[s].ar_id, mst_ports[s].ar_addr, mst_ports[s].ar_len,
-                 mst_ports[s].ar_size, mst_ports[s].ar_burst, mst_ports[s].ar_lock,
-                 mst_ports[s].ar_cache, mst_ports[s].ar_prot, mst_ports[s].ar_qos,
-                 mst_ports[s].ar_region, mst_ports[s].ar_user} = '0;
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_ar_routing
+            if (m == 0) begin
+                assign mst_ports[s].ar_valid = ar_valid_per_mst[0];
+                assign mst_ports[s].ar_id    = slv_ports[0].ar_id;
+                assign mst_ports[s].ar_addr  = slv_ports[0].ar_addr;
+                assign mst_ports[s].ar_len   = slv_ports[0].ar_len;
+                assign mst_ports[s].ar_size  = slv_ports[0].ar_size;
+                assign mst_ports[s].ar_burst = slv_ports[0].ar_burst;
+                assign mst_ports[s].ar_lock  = slv_ports[0].ar_lock;
+                assign mst_ports[s].ar_cache = slv_ports[0].ar_cache;
+                assign mst_ports[s].ar_prot  = slv_ports[0].ar_prot;
+                assign mst_ports[s].ar_qos   = slv_ports[0].ar_qos;
+                assign mst_ports[s].ar_region= slv_ports[0].ar_region;
+                assign mst_ports[s].ar_user  = slv_ports[0].ar_user;
             end
         end
     end
 
-    // AR ready backward path
+    // AR ready: route back to source master
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_ar_ready
-        always_comb begin
-            slv_ports[m].ar_ready = 1'b0;
-            if (slv_ports[m].ar_valid) begin
-                slv_ports[m].ar_ready = mst_ports[decode_addr(slv_ports[m].ar_addr)].ar_ready;
-            end
-        end
+        logic target_slave;
+        assign target_slave = decode_addr(slv_ports[m].ar_addr);
+        assign slv_ports[m].ar_ready = (slv_ports[m].ar_valid && (target_slave < Cfg.NoMstPorts)) ? 
+                                       mst_ports[target_slave].ar_ready : 1'b0;
     end
 
     // =========================================================================
-    // R Channel: Read Response (simple forward)
+    // R Channel: Route based on slave responses
     // =========================================================================
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_r_mux
-        always_comb begin
-            automatic logic found = 1'b0;
-            automatic int unsigned src_slv = 0;
+        logic [Cfg.NoMstPorts-1:0] r_valid_per_slv;
+        
+        for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_r_valid_sig
+            assign r_valid_per_slv[s] = mst_ports[s].r_valid;
+        end
 
-            for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                if (mst_ports[s].r_valid && !found) begin
-                    found = 1'b1;
-                    src_slv = s;
-                end
-            end
-
-            if (found) begin
-                slv_ports[m].r_valid = 1'b1;
-                slv_ports[m].r_id = mst_ports[src_slv].r_id;
-                slv_ports[m].r_data = mst_ports[src_slv].r_data;
-                slv_ports[m].r_resp = mst_ports[src_slv].r_resp;
-                slv_ports[m].r_last = mst_ports[src_slv].r_last;
-                slv_ports[m].r_user = mst_ports[src_slv].r_user;
-            end else begin
-                slv_ports[m].r_valid = 1'b0;
-                {slv_ports[m].r_id, slv_ports[m].r_data, slv_ports[m].r_resp,
-                 slv_ports[m].r_last, slv_ports[m].r_user} = '0;
+        for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_r_routing
+            if (s == 0) begin
+                assign slv_ports[m].r_valid = r_valid_per_slv[0];
+                assign slv_ports[m].r_id    = mst_ports[0].r_id;
+                assign slv_ports[m].r_data  = mst_ports[0].r_data;
+                assign slv_ports[m].r_resp  = mst_ports[0].r_resp;
+                assign slv_ports[m].r_last  = mst_ports[0].r_last;
+                assign slv_ports[m].r_user  = mst_ports[0].r_user;
             end
         end
     end
 
-    // R ready path
+    // R ready: broadcast
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_r_ready
-        always_comb begin
-            mst_ports[s].r_ready = 1'b0;
-            for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (slv_ports[m].ar_valid && (decode_addr(slv_ports[m].ar_addr) == s)) begin
-                    mst_ports[s].r_ready |= slv_ports[m].r_ready;
-                end
-            end
+        logic r_ready_mux;
+        assign r_ready_mux = '0;  // OR all relevant master r_ready
+        assign mst_ports[s].r_ready = r_ready_mux;
+        for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_r_ready_or
+            assign mst_ports[s].r_ready = mst_ports[s].r_ready | slv_ports[m].r_ready;
         end
     end
 
