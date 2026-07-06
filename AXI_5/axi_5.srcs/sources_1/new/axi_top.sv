@@ -178,28 +178,6 @@ module axi_xbar_intf #(
         return '0;
     endfunction
 
-    // Helper task: Find first master with valid request for target slave
-    task automatic find_src_master(
-        input int unsigned tgt_slv,
-        input logic [Cfg.NoSlvPorts-1:0] valid_mask,
-        input logic check_addr_match,
-        output logic found,
-        output int unsigned src_idx
-    );
-        found = 1'b0;
-        src_idx = 0;
-        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-            if (valid_mask[m] && (!check_addr_match || (decode_addr(
-                (valid_mask == (1 << Cfg.NoSlvPorts) - 1) ? slv_ports[m].aw_addr :
-                (valid_mask == (1 << Cfg.NoSlvPorts) - 1) ? slv_ports[m].ar_addr : 
-                slv_ports[m].aw_addr) == tgt_slv))) begin
-                found = 1'b1;
-                src_idx = m;
-                break;
-            end
-        end
-    endtask
-
     // =========================================================================
     // Write Transaction Tracking
     // =========================================================================
@@ -223,30 +201,24 @@ module axi_xbar_intf #(
     // AW/AR Channel: Address-based Demultiplexing
     // =========================================================================
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_aw_demux
-        int unsigned src_mst;
-        logic found;
-
         always_comb begin
-            // Build valid mask for masters targeting this slave
-            logic [Cfg.NoSlvPorts-1:0] aw_valid_mask = '0;
+            automatic logic found = 1'b0;
+            automatic int unsigned src_mst = 0;
+            automatic logic [Cfg.NoSlvPorts-1:0] aw_valid_mask = '0;
+            
             for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
                 aw_valid_mask[m] = slv_ports[m].aw_valid && (decode_addr(slv_ports[m].aw_addr) == s);
             end
 
-            // Find first valid master
-            found = 1'b0;
-            src_mst = 0;
             for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (aw_valid_mask[m]) begin
+                if (aw_valid_mask[m] && !found) begin
                     found = 1'b1;
                     src_mst = m;
-                    break;
                 end
             end
 
-            // Multiplex signals
+            mst_ports[s].aw_valid = found;
             if (found) begin
-                mst_ports[s].aw_valid = 1'b1;
                 mst_ports[s].aw_id = slv_ports[src_mst].aw_id;
                 mst_ports[s].aw_addr = slv_ports[src_mst].aw_addr;
                 mst_ports[s].aw_len = slv_ports[src_mst].aw_len;
@@ -260,7 +232,6 @@ module axi_xbar_intf #(
                 mst_ports[s].aw_atop = slv_ports[src_mst].aw_atop;
                 mst_ports[s].aw_user = slv_ports[src_mst].aw_user;
             end else begin
-                mst_ports[s].aw_valid = 1'b0;
                 {mst_ports[s].aw_id, mst_ports[s].aw_addr, mst_ports[s].aw_len, 
                  mst_ports[s].aw_size, mst_ports[s].aw_burst, mst_ports[s].aw_lock,
                  mst_ports[s].aw_cache, mst_ports[s].aw_prot, mst_ports[s].aw_qos,
@@ -283,18 +254,14 @@ module axi_xbar_intf #(
     // W Channel: Data path (no address routing needed)
     // =========================================================================
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_w_demux
-        logic found;
-        int unsigned src_mst;
-
         always_comb begin
-            found = 1'b0;
-            src_mst = 0;
+            automatic logic found = 1'b0;
+            automatic int unsigned src_mst = 0;
             
             for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (slv_ports[m].w_valid) begin
+                if (slv_ports[m].w_valid && !found) begin
                     found = 1'b1;
                     src_mst = m;
-                    break;
                 end
             end
 
@@ -326,18 +293,14 @@ module axi_xbar_intf #(
     // B Channel: Write Response (routed via tracked master ID)
     // =========================================================================
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_b_mux
-        logic found;
-        int unsigned src_slv;
-
         always_comb begin
-            found = 1'b0;
-            src_slv = 0;
+            automatic logic found = 1'b0;
+            automatic int unsigned src_slv = 0;
 
             for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                if (mst_ports[s].b_valid && (aw_master_id[s] == m)) begin
+                if (mst_ports[s].b_valid && (aw_master_id[s] == m) && !found) begin
                     found = 1'b1;
                     src_slv = s;
-                    break;
                 end
             end
 
@@ -364,27 +327,24 @@ module axi_xbar_intf #(
     // AR Channel: Address-based Demultiplexing (similar to AW)
     // =========================================================================
     for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_ar_demux
-        int unsigned src_mst;
-        logic found;
-
         always_comb begin
-            logic [Cfg.NoSlvPorts-1:0] ar_valid_mask = '0;
+            automatic logic found = 1'b0;
+            automatic int unsigned src_mst = 0;
+            automatic logic [Cfg.NoSlvPorts-1:0] ar_valid_mask = '0;
+
             for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
                 ar_valid_mask[m] = slv_ports[m].ar_valid && (decode_addr(slv_ports[m].ar_addr) == s);
             end
 
-            found = 1'b0;
-            src_mst = 0;
             for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-                if (ar_valid_mask[m]) begin
+                if (ar_valid_mask[m] && !found) begin
                     found = 1'b1;
                     src_mst = m;
-                    break;
                 end
             end
 
+            mst_ports[s].ar_valid = found;
             if (found) begin
-                mst_ports[s].ar_valid = 1'b1;
                 mst_ports[s].ar_id = slv_ports[src_mst].ar_id;
                 mst_ports[s].ar_addr = slv_ports[src_mst].ar_addr;
                 mst_ports[s].ar_len = slv_ports[src_mst].ar_len;
@@ -397,7 +357,6 @@ module axi_xbar_intf #(
                 mst_ports[s].ar_region = slv_ports[src_mst].ar_region;
                 mst_ports[s].ar_user = slv_ports[src_mst].ar_user;
             end else begin
-                mst_ports[s].ar_valid = 1'b0;
                 {mst_ports[s].ar_id, mst_ports[s].ar_addr, mst_ports[s].ar_len,
                  mst_ports[s].ar_size, mst_ports[s].ar_burst, mst_ports[s].ar_lock,
                  mst_ports[s].ar_cache, mst_ports[s].ar_prot, mst_ports[s].ar_qos,
@@ -420,18 +379,14 @@ module axi_xbar_intf #(
     // R Channel: Read Response (simple forward)
     // =========================================================================
     for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_r_mux
-        logic found;
-        int unsigned src_slv;
-
         always_comb begin
-            found = 1'b0;
-            src_slv = 0;
+            automatic logic found = 1'b0;
+            automatic int unsigned src_slv = 0;
 
             for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                if (mst_ports[s].r_valid) begin
+                if (mst_ports[s].r_valid && !found) begin
                     found = 1'b1;
                     src_slv = s;
-                    break;
                 end
             end
 
