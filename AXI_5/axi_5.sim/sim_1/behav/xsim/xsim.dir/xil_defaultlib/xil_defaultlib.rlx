@@ -1,0 +1,8 @@
+0.7
+2020.2
+May 22 2024
+19:03:11
+C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.sim/sim_1/behav/xsim/glbl.v,1708598507,verilog,,,,glbl,,uvm,,,,,,
+,,,,,C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/uvm_pkg.sv,top_tb,,,,,,,,
+C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/uvm_pkg.sv,1783324930,verilog,C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sources_1/new/axi_top.sv,,,uvm_pkg,,,,,,,,
+C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sources_1/new/axi_top.sv,1783324570,systemVerilog,C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/top_tb.sv,C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/top_tb.sv,,$unit_axi_top_sv_474035784;AXI_BUS;axi_pkg;axi_top;axi_xbar_intf,,uvm,,,,,,
