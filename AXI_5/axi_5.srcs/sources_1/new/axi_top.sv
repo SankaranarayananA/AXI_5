@@ -164,9 +164,10 @@ module axi_xbar_intf #(
 );
 
     localparam int unsigned ID_WIDTH = $clog2(Cfg.NoSlvPorts);
+    localparam int unsigned STRB_WIDTH = Cfg.AxiDataWidth / 8;
 
     // =========================================================================
-    // Address Decoder - Determines target slave port from address
+    // Address Decoder
     // =========================================================================
     function automatic int unsigned decode_addr(logic [Cfg.AxiAddrWidth-1:0] addr);
         for (int unsigned i = 0; i < Cfg.NoAddrRules; i++) begin
@@ -178,64 +179,315 @@ module axi_xbar_intf #(
         return '0;
     endfunction
 
-    localparam int unsigned NPORTS = (Cfg.NoMstPorts < Cfg.NoSlvPorts) ? Cfg.NoMstPorts : Cfg.NoSlvPorts;
+    // =========================================================================
+    // Extract signals from interfaces into logic arrays (XSIM workaround)
+    // =========================================================================
+    
+    // Slave (input) side - AW channel
+    logic [Cfg.NoSlvPorts-1:0] slv_aw_valid;
+    logic [Cfg.NoSlvPorts-1:0][Cfg.AxiAddrWidth-1:0] slv_aw_addr;
+    logic [Cfg.NoSlvPorts-1:0][7:0] slv_aw_len;
+    logic [Cfg.NoSlvPorts-1:0][2:0] slv_aw_size;
+    logic [Cfg.NoSlvPorts-1:0][1:0] slv_aw_burst;
+    logic [Cfg.NoSlvPorts-1:0] slv_aw_lock;
+    logic [Cfg.NoSlvPorts-1:0][3:0] slv_aw_cache;
+    logic [Cfg.NoSlvPorts-1:0][2:0] slv_aw_prot;
+    logic [Cfg.NoSlvPorts-1:0][3:0] slv_aw_qos;
+    logic [Cfg.NoSlvPorts-1:0][3:0] slv_aw_region;
+    logic [Cfg.NoSlvPorts-1:0][5:0] slv_aw_atop;
+    logic [Cfg.NoSlvPorts-1:0] slv_aw_ready;
+
+    // Slave (input) side - W channel
+    logic [Cfg.NoSlvPorts-1:0] slv_w_valid;
+    logic [Cfg.NoSlvPorts-1:0][Cfg.AxiDataWidth-1:0] slv_w_data;
+    logic [Cfg.NoSlvPorts-1:0][STRB_WIDTH-1:0] slv_w_strb;
+    logic [Cfg.NoSlvPorts-1:0] slv_w_last;
+    logic [Cfg.NoSlvPorts-1:0] slv_w_ready;
+
+    // Slave (input) side - B channel
+    logic [Cfg.NoSlvPorts-1:0] slv_b_valid;
+    logic [Cfg.NoSlvPorts-1:0][1:0] slv_b_resp;
+    logic [Cfg.NoSlvPorts-1:0] slv_b_ready;
+
+    // Slave (input) side - AR channel
+    logic [Cfg.NoSlvPorts-1:0] slv_ar_valid;
+    logic [Cfg.NoSlvPorts-1:0][Cfg.AxiAddrWidth-1:0] slv_ar_addr;
+    logic [Cfg.NoSlvPorts-1:0][7:0] slv_ar_len;
+    logic [Cfg.NoSlvPorts-1:0][2:0] slv_ar_size;
+    logic [Cfg.NoSlvPorts-1:0][1:0] slv_ar_burst;
+    logic [Cfg.NoSlvPorts-1:0] slv_ar_lock;
+    logic [Cfg.NoSlvPorts-1:0][3:0] slv_ar_cache;
+    logic [Cfg.NoSlvPorts-1:0][2:0] slv_ar_prot;
+    logic [Cfg.NoSlvPorts-1:0][3:0] slv_ar_qos;
+    logic [Cfg.NoSlvPorts-1:0][3:0] slv_ar_region;
+    logic [Cfg.NoSlvPorts-1:0] slv_ar_ready;
+
+    // Slave (input) side - R channel
+    logic [Cfg.NoSlvPorts-1:0] slv_r_valid;
+    logic [Cfg.NoSlvPorts-1:0][Cfg.AxiDataWidth-1:0] slv_r_data;
+    logic [Cfg.NoSlvPorts-1:0][1:0] slv_r_resp;
+    logic [Cfg.NoSlvPorts-1:0] slv_r_last;
+    logic [Cfg.NoSlvPorts-1:0] slv_r_ready;
+
+    // Master (output) side - routed signals
+    logic [Cfg.NoMstPorts-1:0] mst_aw_valid;
+    logic [Cfg.NoMstPorts-1:0][Cfg.AxiAddrWidth-1:0] mst_aw_addr;
+    logic [Cfg.NoMstPorts-1:0][7:0] mst_aw_len;
+    logic [Cfg.NoMstPorts-1:0][2:0] mst_aw_size;
+    logic [Cfg.NoMstPorts-1:0][1:0] mst_aw_burst;
+    logic [Cfg.NoMstPorts-1:0] mst_aw_lock;
+    logic [Cfg.NoMstPorts-1:0][3:0] mst_aw_cache;
+    logic [Cfg.NoMstPorts-1:0][2:0] mst_aw_prot;
+    logic [Cfg.NoMstPorts-1:0][3:0] mst_aw_qos;
+    logic [Cfg.NoMstPorts-1:0][3:0] mst_aw_region;
+    logic [Cfg.NoMstPorts-1:0][5:0] mst_aw_atop;
+    logic [Cfg.NoMstPorts-1:0] mst_aw_ready;
+
+    logic [Cfg.NoMstPorts-1:0] mst_w_valid;
+    logic [Cfg.NoMstPorts-1:0][Cfg.AxiDataWidth-1:0] mst_w_data;
+    logic [Cfg.NoMstPorts-1:0][STRB_WIDTH-1:0] mst_w_strb;
+    logic [Cfg.NoMstPorts-1:0] mst_w_last;
+    logic [Cfg.NoMstPorts-1:0] mst_w_ready;
+
+    logic [Cfg.NoMstPorts-1:0] mst_b_valid;
+    logic [Cfg.NoMstPorts-1:0][1:0] mst_b_resp;
+    logic [Cfg.NoMstPorts-1:0] mst_b_ready;
+
+    logic [Cfg.NoMstPorts-1:0] mst_ar_valid;
+    logic [Cfg.NoMstPorts-1:0][Cfg.AxiAddrWidth-1:0] mst_ar_addr;
+    logic [Cfg.NoMstPorts-1:0][7:0] mst_ar_len;
+    logic [Cfg.NoMstPorts-1:0][2:0] mst_ar_size;
+    logic [Cfg.NoMstPorts-1:0][1:0] mst_ar_burst;
+    logic [Cfg.NoMstPorts-1:0] mst_ar_lock;
+    logic [Cfg.NoMstPorts-1:0][3:0] mst_ar_cache;
+    logic [Cfg.NoMstPorts-1:0][2:0] mst_ar_prot;
+    logic [Cfg.NoMstPorts-1:0][3:0] mst_ar_qos;
+    logic [Cfg.NoMstPorts-1:0][3:0] mst_ar_region;
+    logic [Cfg.NoMstPorts-1:0] mst_ar_ready;
+
+    logic [Cfg.NoMstPorts-1:0] mst_r_valid;
+    logic [Cfg.NoMstPorts-1:0][Cfg.AxiDataWidth-1:0] mst_r_data;
+    logic [Cfg.NoMstPorts-1:0][1:0] mst_r_resp;
+    logic [Cfg.NoMstPorts-1:0] mst_r_last;
+    logic [Cfg.NoMstPorts-1:0] mst_r_ready;
 
     // =========================================================================
-    // Simple 1:1 passthrough for the first implementation.  Each master port
-    // is connected to the corresponding slave port when available, which keeps
-    // the wrapper parseable and allows the testbench to exercise the AXI
-    // channels without the complexity of a full routing engine.
+    // Extract signals from interface arrays using elaboration-time indexing
     // =========================================================================
-    for (genvar i = 0; i < NPORTS; i++) begin : gen_passthrough
-        assign mst_ports[i].aw_valid = slv_ports[i].aw_valid;
-        assign mst_ports[i].aw_id    = slv_ports[i].aw_id;
-        assign mst_ports[i].aw_addr  = slv_ports[i].aw_addr;
-        assign mst_ports[i].aw_len   = slv_ports[i].aw_len;
-        assign mst_ports[i].aw_size  = slv_ports[i].aw_size;
-        assign mst_ports[i].aw_burst = slv_ports[i].aw_burst;
-        assign mst_ports[i].aw_lock  = slv_ports[i].aw_lock;
-        assign mst_ports[i].aw_cache = slv_ports[i].aw_cache;
-        assign mst_ports[i].aw_prot  = slv_ports[i].aw_prot;
-        assign mst_ports[i].aw_qos   = slv_ports[i].aw_qos;
-        assign mst_ports[i].aw_region = slv_ports[i].aw_region;
-        assign mst_ports[i].aw_atop  = slv_ports[i].aw_atop;
-        assign mst_ports[i].aw_user  = slv_ports[i].aw_user;
-        assign slv_ports[i].aw_ready = mst_ports[i].aw_ready;
+    for (genvar m = 0; m < Cfg.NoSlvPorts; m++) begin : gen_extract_slv
+        assign slv_aw_valid[m] = slv_ports[m].aw_valid;
+        assign slv_aw_addr[m] = slv_ports[m].aw_addr;
+        assign slv_aw_len[m] = slv_ports[m].aw_len;
+        assign slv_aw_size[m] = slv_ports[m].aw_size;
+        assign slv_aw_burst[m] = slv_ports[m].aw_burst;
+        assign slv_aw_lock[m] = slv_ports[m].aw_lock;
+        assign slv_aw_cache[m] = slv_ports[m].aw_cache;
+        assign slv_aw_prot[m] = slv_ports[m].aw_prot;
+        assign slv_aw_qos[m] = slv_ports[m].aw_qos;
+        assign slv_aw_region[m] = slv_ports[m].aw_region;
+        assign slv_aw_atop[m] = slv_ports[m].aw_atop;
+        assign slv_ports[m].aw_ready = slv_aw_ready[m];
 
-        assign mst_ports[i].w_valid = slv_ports[i].w_valid;
-        assign mst_ports[i].w_data  = slv_ports[i].w_data;
-        assign mst_ports[i].w_strb  = slv_ports[i].w_strb;
-        assign mst_ports[i].w_last  = slv_ports[i].w_last;
-        assign mst_ports[i].w_user  = slv_ports[i].w_user;
-        assign slv_ports[i].w_ready = mst_ports[i].w_ready;
+        assign slv_w_valid[m] = slv_ports[m].w_valid;
+        assign slv_w_data[m] = slv_ports[m].w_data;
+        assign slv_w_strb[m] = slv_ports[m].w_strb;
+        assign slv_w_last[m] = slv_ports[m].w_last;
+        assign slv_ports[m].w_ready = slv_w_ready[m];
 
-        assign slv_ports[i].b_id    = mst_ports[i].b_id;
-        assign slv_ports[i].b_resp  = mst_ports[i].b_resp;
-        assign slv_ports[i].b_user  = mst_ports[i].b_user;
-        assign slv_ports[i].b_valid = mst_ports[i].b_valid;
-        assign mst_ports[i].b_ready = slv_ports[i].b_ready;
+        assign slv_ports[m].b_valid = slv_b_valid[m];
+        assign slv_ports[m].b_resp = slv_b_resp[m];
+        assign slv_b_ready[m] = slv_ports[m].b_ready;
 
-        assign mst_ports[i].ar_valid = slv_ports[i].ar_valid;
-        assign mst_ports[i].ar_id    = slv_ports[i].ar_id;
-        assign mst_ports[i].ar_addr  = slv_ports[i].ar_addr;
-        assign mst_ports[i].ar_len   = slv_ports[i].ar_len;
-        assign mst_ports[i].ar_size  = slv_ports[i].ar_size;
-        assign mst_ports[i].ar_burst = slv_ports[i].ar_burst;
-        assign mst_ports[i].ar_lock  = slv_ports[i].ar_lock;
-        assign mst_ports[i].ar_cache = slv_ports[i].ar_cache;
-        assign mst_ports[i].ar_prot  = slv_ports[i].ar_prot;
-        assign mst_ports[i].ar_qos   = slv_ports[i].ar_qos;
-        assign mst_ports[i].ar_region = slv_ports[i].ar_region;
-        assign mst_ports[i].ar_user  = slv_ports[i].ar_user;
-        assign slv_ports[i].ar_ready = mst_ports[i].ar_ready;
+        assign slv_ar_valid[m] = slv_ports[m].ar_valid;
+        assign slv_ar_addr[m] = slv_ports[m].ar_addr;
+        assign slv_ar_len[m] = slv_ports[m].ar_len;
+        assign slv_ar_size[m] = slv_ports[m].ar_size;
+        assign slv_ar_burst[m] = slv_ports[m].ar_burst;
+        assign slv_ar_lock[m] = slv_ports[m].ar_lock;
+        assign slv_ar_cache[m] = slv_ports[m].ar_cache;
+        assign slv_ar_prot[m] = slv_ports[m].ar_prot;
+        assign slv_ar_qos[m] = slv_ports[m].ar_qos;
+        assign slv_ar_region[m] = slv_ports[m].ar_region;
+        assign slv_ports[m].ar_ready = slv_ar_ready[m];
 
-        assign slv_ports[i].r_id    = mst_ports[i].r_id;
-        assign slv_ports[i].r_data  = mst_ports[i].r_data;
-        assign slv_ports[i].r_resp  = mst_ports[i].r_resp;
-        assign slv_ports[i].r_last  = mst_ports[i].r_last;
-        assign slv_ports[i].r_user  = mst_ports[i].r_user;
-        assign slv_ports[i].r_valid = mst_ports[i].r_valid;
-        assign mst_ports[i].r_ready = slv_ports[i].r_ready;
+        assign slv_ports[m].r_valid = slv_r_valid[m];
+        assign slv_ports[m].r_data = slv_r_data[m];
+        assign slv_ports[m].r_resp = slv_r_resp[m];
+        assign slv_ports[m].r_last = slv_r_last[m];
+        assign slv_r_ready[m] = slv_ports[m].r_ready;
+    end
+
+    // =========================================================================
+    // Routing logic - use always_comb on logic arrays (XSIM compatible)
+    // =========================================================================
+    always_comb begin
+        // Default: all outputs zero
+        mst_aw_valid = '0;
+        mst_aw_addr = '0;
+        mst_aw_len = '0;
+        mst_aw_size = '0;
+        mst_aw_burst = '0;
+        mst_aw_lock = '0;
+        mst_aw_cache = '0;
+        mst_aw_prot = '0;
+        mst_aw_qos = '0;
+        mst_aw_region = '0;
+        mst_aw_atop = '0;
+        slv_aw_ready = '0;
+
+        mst_w_valid = '0;
+        mst_w_data = '0;
+        mst_w_strb = '0;
+        mst_w_last = '0;
+        slv_w_ready = '0;
+
+        slv_b_valid = '0;
+        slv_b_resp = '0;
+        mst_b_ready = '0;
+
+        mst_ar_valid = '0;
+        mst_ar_addr = '0;
+        mst_ar_len = '0;
+        mst_ar_size = '0;
+        mst_ar_burst = '0;
+        mst_ar_lock = '0;
+        mst_ar_cache = '0;
+        mst_ar_prot = '0;
+        mst_ar_qos = '0;
+        mst_ar_region = '0;
+        slv_ar_ready = '0;
+
+        slv_r_valid = '0;
+        slv_r_data = '0;
+        slv_r_resp = '0;
+        slv_r_last = '0;
+        mst_r_ready = '0;
+
+        // Route AW transactions by address
+        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
+            if (slv_aw_valid[m]) begin
+                int unsigned target = decode_addr(slv_aw_addr[m]);
+                if (target < Cfg.NoMstPorts) begin
+                    mst_aw_valid[target] = 1'b1;
+                    mst_aw_addr[target] = slv_aw_addr[m];
+                    mst_aw_len[target] = slv_aw_len[m];
+                    mst_aw_size[target] = slv_aw_size[m];
+                    mst_aw_burst[target] = slv_aw_burst[m];
+                    mst_aw_lock[target] = slv_aw_lock[m];
+                    mst_aw_cache[target] = slv_aw_cache[m];
+                    mst_aw_prot[target] = slv_aw_prot[m];
+                    mst_aw_qos[target] = slv_aw_qos[m];
+                    mst_aw_region[target] = slv_aw_region[m];
+                    mst_aw_atop[target] = slv_aw_atop[m];
+                    slv_aw_ready[m] = mst_aw_ready[target];
+                end
+            end
+        end
+
+        // Route W transactions (broadcast eligible)
+        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
+            if (slv_w_valid[m]) begin
+                for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
+                    mst_w_valid[s] = 1'b1;
+                    mst_w_data[s] = slv_w_data[m];
+                    mst_w_strb[s] = slv_w_strb[m];
+                    mst_w_last[s] = slv_w_last[m];
+                end
+                for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
+                    slv_w_ready[m] |= mst_w_ready[s];
+                end
+            end
+        end
+
+        // Route B responses back to originating master
+        for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
+            if (mst_b_valid[s]) begin
+                for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
+                    slv_b_valid[m] = 1'b1;
+                    slv_b_resp[m] = mst_b_resp[s];
+                    mst_b_ready[s] = slv_b_ready[m];
+                end
+            end
+        end
+
+        // Route AR transactions by address
+        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
+            if (slv_ar_valid[m]) begin
+                int unsigned target = decode_addr(slv_ar_addr[m]);
+                if (target < Cfg.NoMstPorts) begin
+                    mst_ar_valid[target] = 1'b1;
+                    mst_ar_addr[target] = slv_ar_addr[m];
+                    mst_ar_len[target] = slv_ar_len[m];
+                    mst_ar_size[target] = slv_ar_size[m];
+                    mst_ar_burst[target] = slv_ar_burst[m];
+                    mst_ar_lock[target] = slv_ar_lock[m];
+                    mst_ar_cache[target] = slv_ar_cache[m];
+                    mst_ar_prot[target] = slv_ar_prot[m];
+                    mst_ar_qos[target] = slv_ar_qos[m];
+                    mst_ar_region[target] = slv_ar_region[m];
+                    slv_ar_ready[m] = mst_ar_ready[target];
+                end
+            end
+        end
+
+        // Route R responses back to all masters
+        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
+            for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
+                if (mst_r_valid[s]) begin
+                    slv_r_valid[m] = 1'b1;
+                    slv_r_data[m] = mst_r_data[s];
+                    slv_r_resp[m] = mst_r_resp[s];
+                    slv_r_last[m] = mst_r_last[s];
+                    mst_r_ready[s] |= slv_r_ready[m];
+                end
+            end
+        end
+    end
+
+    // =========================================================================
+    // Pack routed signals back into master interface arrays (elaboration-time)
+    // =========================================================================
+    for (genvar s = 0; s < Cfg.NoMstPorts; s++) begin : gen_pack_mst
+        assign mst_ports[s].aw_valid = mst_aw_valid[s];
+        assign mst_ports[s].aw_addr = mst_aw_addr[s];
+        assign mst_ports[s].aw_len = mst_aw_len[s];
+        assign mst_ports[s].aw_size = mst_aw_size[s];
+        assign mst_ports[s].aw_burst = mst_aw_burst[s];
+        assign mst_ports[s].aw_lock = mst_aw_lock[s];
+        assign mst_ports[s].aw_cache = mst_aw_cache[s];
+        assign mst_ports[s].aw_prot = mst_aw_prot[s];
+        assign mst_ports[s].aw_qos = mst_aw_qos[s];
+        assign mst_ports[s].aw_region = mst_aw_region[s];
+        assign mst_ports[s].aw_atop = mst_aw_atop[s];
+        assign mst_aw_ready[s] = mst_ports[s].aw_ready;
+
+        assign mst_ports[s].w_valid = mst_w_valid[s];
+        assign mst_ports[s].w_data = mst_w_data[s];
+        assign mst_ports[s].w_strb = mst_w_strb[s];
+        assign mst_ports[s].w_last = mst_w_last[s];
+        assign mst_w_ready[s] = mst_ports[s].w_ready;
+
+        assign mst_b_valid[s] = mst_ports[s].b_valid;
+        assign mst_b_resp[s] = mst_ports[s].b_resp;
+        assign mst_ports[s].b_ready = mst_b_ready[s];
+
+        assign mst_ports[s].ar_valid = mst_ar_valid[s];
+        assign mst_ports[s].ar_addr = mst_ar_addr[s];
+        assign mst_ports[s].ar_len = mst_ar_len[s];
+        assign mst_ports[s].ar_size = mst_ar_size[s];
+        assign mst_ports[s].ar_burst = mst_ar_burst[s];
+        assign mst_ports[s].ar_lock = mst_ar_lock[s];
+        assign mst_ports[s].ar_cache = mst_ar_cache[s];
+        assign mst_ports[s].ar_prot = mst_ar_prot[s];
+        assign mst_ports[s].ar_qos = mst_ar_qos[s];
+        assign mst_ports[s].ar_region = mst_ar_region[s];
+        assign mst_ar_ready[s] = mst_ports[s].ar_ready;
+
+        assign mst_r_valid[s] = mst_ports[s].r_valid;
+        assign mst_r_data[s] = mst_ports[s].r_data;
+        assign mst_r_resp[s] = mst_ports[s].r_resp;
+        assign mst_r_last[s] = mst_ports[s].r_last;
+        assign mst_ports[s].r_ready = mst_r_ready[s];
     end
 
 endmodule
