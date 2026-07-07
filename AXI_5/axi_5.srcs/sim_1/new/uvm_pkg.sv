@@ -43,6 +43,25 @@ package uvm_pkg;
     endfunction
   endclass
 
+  class uvm_sequencer #(type REQ = uvm_sequence_item) extends uvm_component;
+    REQ req_q[$];
+
+    function new(string name = "uvm_sequencer", uvm_component parent = null);
+      super.new(name);
+    endfunction
+
+    virtual function void put(REQ req);
+      req_q.push_back(req);
+    endfunction
+
+    virtual function REQ get();
+      if (req_q.size() == 0) begin
+        return null;
+      end
+      return req_q.pop_front();
+    endfunction
+  endclass
+
   class uvm_sequence #(type REQ = uvm_sequence_item) extends uvm_object;
     uvm_sequencer #(REQ) m_sequencer;
 
@@ -63,25 +82,6 @@ package uvm_pkg;
         m_sequencer.put(req);
       end
     endtask
-  endclass
-
-  class uvm_sequencer #(type REQ = uvm_sequence_item) extends uvm_component;
-    REQ req_q[$];
-
-    function new(string name = "uvm_sequencer", uvm_component parent = null);
-      super.new(name);
-    endfunction
-
-    virtual function void put(REQ req);
-      req_q.push_back(req);
-    endfunction
-
-    virtual function REQ get();
-      if (req_q.size() == 0) begin
-        return null;
-      end
-      return req_q.pop_front();
-    endfunction
   endclass
 
   class uvm_reg extends uvm_object;
