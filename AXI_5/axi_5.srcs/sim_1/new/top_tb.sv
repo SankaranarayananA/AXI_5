@@ -8,13 +8,6 @@
 `include "../../../axi5-master/src/axi5_intf.sv"
 `include "../../../axi5-master/src/axi5_nsaid_remap.sv"
 `include "../../../axi5-master/src/axi5_to_axi4.sv"
-`include "tb_test_direct_rw.svh"
-`include "tb_test_sequence_rw.svh"
-`include "tb_test_uvm_smoke.svh"
-`include "tb_test_multi_slave.svh"
-`include "tb_test_back_to_back.svh"
-`include "tb_test_concurrent_masters.svh"
-`include "tb_test_nsaid_remap.svh"
 
 import uvm_pkg::*;
 import axi_uvm_ral_pkg::*;
@@ -448,6 +441,16 @@ module top_tb;
       end
     end
   endgenerate
+
+  // Test-case tasks (module-scoped: they reference master5_if, axi_write,
+  // env_init_h, AXI_*_WIDTH, etc., so they must be included inside the module).
+`include "tb_test_direct_rw.svh"
+`include "tb_test_sequence_rw.svh"
+`include "tb_test_uvm_smoke.svh"
+`include "tb_test_multi_slave.svh"
+`include "tb_test_back_to_back.svh"
+`include "tb_test_concurrent_masters.svh"
+`include "tb_test_nsaid_remap.svh"
 
   initial begin
     string testname;
