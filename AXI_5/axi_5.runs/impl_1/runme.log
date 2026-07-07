@@ -1,0 +1,346 @@
+
+*** Running vivado
+    with args -log axi_top.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source axi_top.tcl -notrace
+
+
+
+****** Vivado v2024.1 (64-bit)
+  **** SW Build 5076996 on Wed May 22 18:37:14 MDT 2024
+  **** IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
+  **** SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
+  **** Start of session at: Wed Jul  8 01:21:44 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source axi_top.tcl -notrace
+create_project: Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 531.883 ; gain = 201.828
+Command: link_design -top axi_top -part xc7k70tfbv676-1
+Design is defaulting to srcset: sources_1
+Design is defaulting to constrset: constrs_1
+INFO: [Device 21-403] Loading part xc7k70tfbv676-1
+INFO: [Device 21-9227] Part: xc7k70tfbv676-1 does not have CEAM library.
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.012 . Memory (MB): peak = 936.352 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 68 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Read ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.013 . Memory (MB): peak = 1029.234 ; gain = 1.281
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1029.672 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+7 Infos, 0 Warnings, 0 Critical Warnings and 0 Errors encountered.
+link_design completed successfully
+Command: opt_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7k70t'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7k70t'
+Running DRC as a precondition to command opt_design
+
+Starting DRC Task
+INFO: [DRC 23-27] Running DRC with 2 threads
+INFO: [Project 1-461] DRC finished with 0 Errors
+INFO: [Project 1-462] Please refer to the DRC report (report_drc) for more information.
+
+Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.895 . Memory (MB): peak = 1087.871 ; gain = 29.301
+
+Starting Cache Timing Information Task
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Ending Cache Timing Information Task | Checksum: 110713147
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 1645.703 ; gain = 557.832
+
+Starting Logic Optimization Task
+
+Phase 1 Initialization
+
+Phase 1.1 Core Generation And Design Setup
+Phase 1.1 Core Generation And Design Setup | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.003 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Phase 1.2 Setup Constraints And Sort Netlist
+Phase 1.2 Setup Constraints And Sort Netlist | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.008 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Phase 1 Initialization | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.009 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Phase 2 Timer Update And Timing Data Collection
+
+Phase 2.1 Timer Update
+Phase 2.1 Timer Update | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.036 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Phase 2.2 Timing Data Collection
+Phase 2.2 Timing Data Collection | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.067 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Phase 2 Timer Update And Timing Data Collection | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.069 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Phase 3 Retarget
+INFO: [Opt 31-1834] Total Chains To Be Transformed Were: 0 AND Number of Transformed insts Created are: 0
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Opt 31-49] Retargeted 0 cell(s).
+Phase 3 Retarget | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.154 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Retarget | Checksum: 110713147
+INFO: [Opt 31-389] Phase Retarget created 0 cells and removed 0 cells
+
+Phase 4 Constant propagation
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Phase 4 Constant propagation | Checksum: 110713147
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.162 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Constant propagation | Checksum: 110713147
+INFO: [Opt 31-389] Phase Constant propagation created 0 cells and removed 0 cells
+
+Phase 5 Sweep
+Phase 5 Sweep | Checksum: 1cbebb8a1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.183 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Sweep | Checksum: 1cbebb8a1
+INFO: [Opt 31-389] Phase Sweep created 0 cells and removed 0 cells
+
+Phase 6 BUFG optimization
+Phase 6 BUFG optimization | Checksum: 1cbebb8a1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.216 . Memory (MB): peak = 2023.688 ; gain = 0.000
+BUFG optimization | Checksum: 1cbebb8a1
+INFO: [Opt 31-662] Phase BUFG optimization created 0 cells of which 0 are BUFGs and removed 0 cells.
+
+Phase 7 Shift Register Optimization
+INFO: [Opt 31-1064] SRL Remap converted 0 SRLs to 0 registers and converted 0 registers of register chains to 0 SRLs
+Phase 7 Shift Register Optimization | Checksum: 1cbebb8a1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.220 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Shift Register Optimization | Checksum: 1cbebb8a1
+INFO: [Opt 31-389] Phase Shift Register Optimization created 0 cells and removed 0 cells
+
+Phase 8 Post Processing Netlist
+Phase 8 Post Processing Netlist | Checksum: 1cbebb8a1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.225 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Post Processing Netlist | Checksum: 1cbebb8a1
+INFO: [Opt 31-389] Phase Post Processing Netlist created 0 cells and removed 0 cells
+
+Phase 9 Finalization
+
+Phase 9.1 Finalizing Design Cores and Updating Shapes
+Phase 9.1 Finalizing Design Cores and Updating Shapes | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.258 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Phase 9.2 Verifying Netlist Connectivity
+
+Starting Connectivity Check Task
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Phase 9.2 Verifying Netlist Connectivity | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.261 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Phase 9 Finalization | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.261 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Opt_design Change Summary
+=========================
+
+
+-------------------------------------------------------------------------------------------------------------------------
+|  Phase                        |  #Cells created  |  #Cells Removed  |  #Constrained objects preventing optimizations  |
+-------------------------------------------------------------------------------------------------------------------------
+|  Retarget                     |               0  |               0  |                                              0  |
+|  Constant propagation         |               0  |               0  |                                              0  |
+|  Sweep                        |               0  |               0  |                                              0  |
+|  BUFG optimization            |               0  |               0  |                                              0  |
+|  Shift Register Optimization  |               0  |               0  |                                              0  |
+|  Post Processing Netlist      |               0  |               0  |                                              0  |
+-------------------------------------------------------------------------------------------------------------------------
+
+
+Ending Logic Optimization Task | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.263 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Starting Power Optimization Task
+INFO: [Pwropt 34-132] Skipping clock gating for clocks with a period < 2.00 ns.
+Ending Power Optimization Task | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.025 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Starting Final Cleanup Task
+Ending Final Cleanup Task | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Starting Netlist Obfuscation Task
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Ending Netlist Obfuscation Task | Checksum: 16fc4a0e1
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 2023.688 ; gain = 0.000
+INFO: [Common 17-83] Releasing license: Implementation
+25 Infos, 0 Warnings, 0 Critical Warnings and 0 Errors encountered.
+opt_design completed successfully
+opt_design: Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2023.688 ; gain = 965.117
+INFO: [Vivado 12-24828] Executing command : report_drc -file axi_top_drc_opted.rpt -pb axi_top_drc_opted.pb -rpx axi_top_drc_opted.rpx
+Command: report_drc -file axi_top_drc_opted.rpt -pb axi_top_drc_opted.pb -rpx axi_top_drc_opted.rpx
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2024.1/data/ip'.
+INFO: [DRC 23-27] Running DRC with 2 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.runs/impl_1/axi_top_drc_opted.rpt.
+report_drc completed successfully
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.012 . Memory (MB): peak = 2023.688 ; gain = 0.000
+INFO: [Common 17-1381] The checkpoint 'C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.runs/impl_1/axi_top_opt.dcp' has been generated.
+Command: place_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7k70t'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7k70t'
+INFO: [Common 17-83] Releasing license: Implementation
+INFO: [DRC 23-27] Running DRC with 2 threads
+INFO: [Vivado_Tcl 4-198] DRC finished with 0 Errors
+INFO: [Vivado_Tcl 4-199] Please refer to the DRC report (report_drc) for more information.
+Running DRC as a precondition to command place_design
+INFO: [DRC 23-27] Running DRC with 2 threads
+INFO: [Vivado_Tcl 4-198] DRC finished with 0 Errors
+INFO: [Vivado_Tcl 4-199] Please refer to the DRC report (report_drc) for more information.
+INFO: [Place 30-611] Multithreading enabled for place_design using a maximum of 2 CPUs
+
+Starting Placer Task
+
+Phase 1 Placer Initialization
+
+Phase 1.1 Placer Initialization Netlist Sorting
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Phase 1.1 Placer Initialization Netlist Sorting | Checksum: cbe883ec
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.011 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2023.688 ; gain = 0.000
+
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device
+ERROR: [Place 30-415] IO Placement failed due to overutilization. This design contains 1174 I/O ports
+ while the target  device: 7k70t package: fbv676, contains only 300 available user I/O. The target device has 300 usable I/O pins of which 0 are already occupied by user-locked I/Os.
+ To rectify this issue:
+ 1. Ensure you are targeting the correct device and package.  Select a larger device or different package if necessary.
+ 2. Check the top-level ports of the design to ensure the correct number of ports are specified.
+ 3. Consider design changes to reduce the number of I/Os necessary.
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+ERROR: [Place 30-68] Instance b_org_rptr_reg[0][3]_i_3 (IBUF) is not placed
+ERROR: [Place 30-68] Instance b_org_rptr_reg[1][3]_i_3 (IBUF) is not placed
+ERROR: [Place 30-68] Instance clk_i_IBUF_BUFG_inst (BUFG) is not placed
+ERROR: [Place 30-68] Instance clk_i_IBUF_inst (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.ar_ready_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.ar_ready_INST_0_i_4 (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.aw_ready_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.aw_ready_INST_0_i_4 (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_id[0]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_id[1]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_id[2]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_id[3]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_resp[0]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_resp[1]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_user[-1]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_user[0]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.b_valid_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[0]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[10]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[11]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[12]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[13]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[14]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[15]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[16]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[17]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[18]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[19]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[1]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[20]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[21]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[22]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[23]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[24]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[25]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[26]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[27]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[28]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[29]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[2]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[30]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[31]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[32]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[33]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[34]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[35]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[36]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[37]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[38]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[39]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[3]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[40]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[41]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[42]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[43]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[44]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[45]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[46]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[47]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[48]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[49]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[4]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[50]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[51]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[52]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[53]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[54]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[55]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[56]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[57]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[58]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[59]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[5]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[60]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[61]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[62]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[63]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[6]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[7]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[8]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_data[9]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_id[0]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_id[1]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_id[2]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_id[3]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_last_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_resp[0]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_resp[1]_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_user[-1]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_user[0]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.r_valid_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[0]\\.w_ready_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.ar_ready_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.ar_ready_INST_0_i_2 (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.ar_ready_INST_0_i_4 (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.aw_ready_INST_0 (OBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.aw_ready_INST_0_i_2 (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.aw_ready_INST_0_i_6 (IBUF) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.b_id[0]_INST_0 (OBUFT) is not placed
+ERROR: [Place 30-68] Instance master_ports[1]\\.b_id[1]_INST_0 (OBUFT) is not placed
+INFO: [Common 17-14] Message 'Place 30-68' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device | Checksum: 9dd36804
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.330 . Memory (MB): peak = 2023.688 ; gain = 0.000
+Phase 1 Placer Initialization | Checksum: 9dd36804
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.331 . Memory (MB): peak = 2023.688 ; gain = 0.000
+ERROR: [Place 30-99] Placer failed with error: 'IO Clock Placer failed'
+Please review all ERROR, CRITICAL WARNING, and WARNING messages during placement to understand the cause for failure.
+Ending Placer Task | Checksum: 9dd36804
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.334 . Memory (MB): peak = 2023.688 ; gain = 0.000
+43 Infos, 0 Warnings, 0 Critical Warnings and 103 Errors encountered.
+place_design failed
+ERROR: [Common 17-69] Command failed: Placer could not place all instances
+INFO: [Common 17-206] Exiting Vivado at Wed Jul  8 01:22:14 2026...

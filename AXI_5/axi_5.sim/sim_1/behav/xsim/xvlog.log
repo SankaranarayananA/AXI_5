@@ -4,11 +4,4 @@ INFO: [VRFC 10-311] analyzing module axi_top
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/top_tb.sv" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module axi5_nsaid_remap_intf
 INFO: [VRFC 10-311] analyzing module axi5_to_axi4_intf
-ERROR: [VRFC 10-2989] 'AXI_DATA_WIDTH' is not declared [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/tb_test_direct_rw.svh:3]
-ERROR: [VRFC 10-2989] 'AXI_ADDR_WIDTH' is not declared [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/tb_test_direct_rw.svh:4]
-ERROR: [VRFC 10-2989] 'AXI_DATA_WIDTH' is not declared [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/tb_test_direct_rw.svh:5]
 INFO: [VRFC 10-311] analyzing module top_tb
-ERROR: [VRFC 10-8530] module 'top_tb' is ignored due to previous errors [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/top_tb.sv:63]
-ERROR: [VRFC 10-1775] range must be bounded by constant expressions [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/tb_test_direct_rw.svh:3]
-ERROR: [VRFC 10-1775] range must be bounded by constant expressions [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/tb_test_direct_rw.svh:4]
-ERROR: [VRFC 10-1775] range must be bounded by constant expressions [C:/Users/Sankaranarayanan A/Desktop/AXI/AXI_5/AXI_5/axi_5.srcs/sim_1/new/tb_test_direct_rw.svh:5]
