@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+// Minimal RAL register model for the AXI environment.
 package axi_uvm_ral_pkg;
   import uvm_pkg::*;
 

@@ -1,7 +1,4 @@
-// AXI5 feature test: verifies the axi5_nsaid_remap component. The instance in
-// top_tb is configured with MatchNsaid=0 -> RemapNsaid=3, so a matching NSAID
-// must be rewritten while any other value passes through unchanged, on both the
-// AW and AR channels. The remap is combinational, so no handshake is required.
+// Test: nsaid_remap - AXI5 axi5_nsaid_remap AW/AR remap and passthrough.
 task automatic run_test_nsaid_remap();
   // Matching NSAID (0) is remapped to 3 on AW.
   master5_if.aw_nsaid = 4'h0;

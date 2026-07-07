@@ -1,3 +1,4 @@
+// Testbench-wide sizing and configuration defines.
 `ifndef TB_DEFINES_SVH
 `define TB_DEFINES_SVH
 

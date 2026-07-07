@@ -1,6 +1,4 @@
-// Back-to-back traffic test: issue several writes then read them all back to
-// exercise the crossbar write-lock release and the B/R origin FIFOs across
-// multiple consecutive transactions. Reference: tb_axi_xbar.
+// Test: back_to_back - consecutive writes then reads exercise the B/R FIFOs.
 task automatic run_test_back_to_back();
   logic [AXI_ADDR_WIDTH-1:0] a;
   logic [AXI_DATA_WIDTH-1:0] d;

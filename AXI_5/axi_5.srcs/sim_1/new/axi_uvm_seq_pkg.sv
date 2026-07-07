@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+// AXI sequence item, sequencer, and read/write sequence.
 package axi_uvm_seq_pkg;
   import uvm_pkg::*;
 

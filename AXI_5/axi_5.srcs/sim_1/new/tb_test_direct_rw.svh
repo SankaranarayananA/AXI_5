@@ -1,3 +1,4 @@
+// Test: direct_rw - single AXI write then read-back, checked by scoreboard.
 task automatic run_test_direct_rw();
   logic [AXI_DATA_WIDTH-1:0] rd_data;
   logic [AXI_ADDR_WIDTH-1:0] wr_addr;

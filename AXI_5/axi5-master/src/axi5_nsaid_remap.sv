@@ -1,9 +1,7 @@
-// Copyright (c) 2026 sankaran
 // SPDX-License-Identifier: SHL-0.51
+// Copyright (c) 2026 sankaran
 //
-// AXI5 fork extension component.
-
-// AXI5 NSAID remapper for AW/AR channels.
+// AXI5 NSAID remapper for the AW and AR channels.
 module axi5_nsaid_remap_intf #(
   parameter axi_pkg::nsaid_t MatchNsaid = '0,
   parameter axi_pkg::nsaid_t RemapNsaid = '0

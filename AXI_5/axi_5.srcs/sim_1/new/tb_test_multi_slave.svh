@@ -1,6 +1,4 @@
-// Address-decode / routing test: a single master accesses both slave regions
-// (each slave owns a 0x2000 address window) and verifies data lands in the
-// correct slave without cross-contamination. Reference: tb_axi_xbar.
+// Test: multi_slave - address decode/routing across both slave windows.
 task automatic run_test_multi_slave();
   logic [AXI_ADDR_WIDTH-1:0] a0;
   logic [AXI_ADDR_WIDTH-1:0] a1;

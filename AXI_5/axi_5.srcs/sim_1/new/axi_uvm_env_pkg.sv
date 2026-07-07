@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+// AXI environment: config, sequencer, and memory scoreboard.
 package axi_uvm_env_pkg;
   import uvm_pkg::*;
   import axi_uvm_seq_pkg::*;

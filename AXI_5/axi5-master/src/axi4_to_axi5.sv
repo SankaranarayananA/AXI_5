@@ -1,9 +1,7 @@
-// Copyright (c) 2026 sankaran
 // SPDX-License-Identifier: SHL-0.51
+// Copyright (c) 2026 sankaran
 //
-// AXI5 fork extension adapter.
-
-// AXI4 to AXI5 adapter: forwards all AXI4 signals and injects default NSAID.
+// AXI4-to-AXI5 adapter: forwards AXI4 channels and injects a default NSAID.
 module axi4_to_axi5_intf #(
   parameter int unsigned AXI_ADDR_WIDTH = 32,
   parameter int unsigned AXI_DATA_WIDTH = 64,

@@ -1,9 +1,7 @@
-// Copyright (c) 2026 sankaran
 // SPDX-License-Identifier: SHL-0.51
+// Copyright (c) 2026 sankaran
 //
-// AXI5 fork extension for NSAID-capable interface support.
-
-// AXI5 interface extension with NSAID signals.
+// AXI5 interface with NSAID signal extensions.
 interface AXI5_BUS #(
   parameter int unsigned AXI_ADDR_WIDTH = 0,
   parameter int unsigned AXI_DATA_WIDTH = 0,

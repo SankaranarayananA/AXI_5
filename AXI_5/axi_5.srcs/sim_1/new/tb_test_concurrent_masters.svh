@@ -1,8 +1,4 @@
-// Concurrent multi-master test: master 0 (through the AXI5 -> AXI4 bridge) and
-// master 1 (direct AXI4) issue transactions to different slaves in parallel.
-// Validates the crossbar's per-master arbitration and origin-tracked B/R
-// routing (each response must return to the originating master).
-// Reference: tb_axi_xbar (all masters issue simultaneously).
+// Test: concurrent_masters - parallel masters with origin-tracked B/R routing.
 task automatic run_test_concurrent_masters();
   logic [AXI_ADDR_WIDTH-1:0] a0;
   logic [AXI_ADDR_WIDTH-1:0] a1;

@@ -1,3 +1,4 @@
+// Test: sequence_rw - UVM-style write/read sequence driven onto the bus.
 task automatic run_test_sequence_rw();
   axi_read_write_sequence seq_traffic;
   axi_seq_item seq_req;
