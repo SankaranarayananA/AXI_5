@@ -31,6 +31,7 @@ package axi_pkg;
     typedef logic [3:0] qos_t;
     typedef logic [3:0] region_t;
     typedef logic [5:0] atop_t;
+    typedef logic [3:0] nsaid_t;
     typedef logic [1:0] resp_t;
 
     localparam bit [9:0] CUT_ALL_AX = 10'b111_11_111_11;
@@ -318,8 +319,43 @@ module axi_xbar_intf #(
     end
 
     // =========================================================================
-    // Routing logic - use always_comb on logic arrays (XSIM compatible)
+    // Multi-master routing with per-slave origin tracking (in-order)
     // =========================================================================
+    localparam int unsigned NM_MST   = Cfg.NoSlvPorts;   // upstream masters
+    localparam int unsigned NM_SLV   = Cfg.NoMstPorts;   // downstream slaves
+    localparam int unsigned MIDX_W   = (NM_MST > 1) ? $clog2(NM_MST) : 1;
+    localparam int unsigned OUTSTAND = 16;               // max outstanding per slave
+    localparam int unsigned OPTR_W   = $clog2(OUTSTAND);
+
+    // Write-data path lock (per downstream slave)
+    logic                w_busy_q  [NM_SLV];
+    logic [MIDX_W-1:0]   w_src_q   [NM_SLV];
+
+    // B-response origin FIFO (per downstream slave)
+    logic [MIDX_W-1:0]   b_org_mem [NM_SLV][OUTSTAND];
+    logic [OPTR_W-1:0]   b_org_wptr[NM_SLV];
+    logic [OPTR_W-1:0]   b_org_rptr[NM_SLV];
+    logic [OPTR_W:0]     b_org_cnt [NM_SLV];
+
+    // R-response origin FIFO (per downstream slave)
+    logic [MIDX_W-1:0]   r_org_mem [NM_SLV][OUTSTAND];
+    logic [OPTR_W-1:0]   r_org_wptr[NM_SLV];
+    logic [OPTR_W-1:0]   r_org_rptr[NM_SLV];
+    logic [OPTR_W:0]     r_org_cnt [NM_SLV];
+
+    // Combinational arbitration / handshake helpers (per downstream slave)
+    logic [MIDX_W-1:0]   aw_gnt_src [NM_SLV];
+    logic                aw_gnt_vld [NM_SLV];
+    logic                aw_hsk     [NM_SLV];
+    logic                w_hsk_last [NM_SLV];
+    logic [MIDX_W-1:0]   b_org      [NM_SLV];
+    logic                b_hsk      [NM_SLV];
+    logic [MIDX_W-1:0]   ar_gnt_src [NM_SLV];
+    logic                ar_gnt_vld [NM_SLV];
+    logic                ar_hsk     [NM_SLV];
+    logic [MIDX_W-1:0]   r_org      [NM_SLV];
+    logic                r_hsk_last [NM_SLV];
+
     always_comb begin
         // Default: all outputs zero
         mst_aw_valid = '0;
@@ -363,83 +399,156 @@ module axi_xbar_intf #(
         slv_r_last = '0;
         mst_r_ready = '0;
 
-        // Route AW transactions by address
-        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-            if (slv_aw_valid[m]) begin
-                int unsigned target = decode_addr(slv_aw_addr[m]);
-                if (target < Cfg.NoMstPorts) begin
-                    mst_aw_valid[target] = 1'b1;
-                    mst_aw_addr[target] = slv_aw_addr[m];
-                    mst_aw_len[target] = slv_aw_len[m];
-                    mst_aw_size[target] = slv_aw_size[m];
-                    mst_aw_burst[target] = slv_aw_burst[m];
-                    mst_aw_lock[target] = slv_aw_lock[m];
-                    mst_aw_cache[target] = slv_aw_cache[m];
-                    mst_aw_prot[target] = slv_aw_prot[m];
-                    mst_aw_qos[target] = slv_aw_qos[m];
-                    mst_aw_region[target] = slv_aw_region[m];
-                    mst_aw_atop[target] = slv_aw_atop[m];
-                    slv_aw_ready[m] = mst_aw_ready[target];
+        for (int unsigned s = 0; s < NM_SLV; s++) begin
+            aw_gnt_src[s] = '0;
+            aw_gnt_vld[s] = 1'b0;
+            aw_hsk[s]     = 1'b0;
+            w_hsk_last[s] = 1'b0;
+            b_org[s]      = b_org_mem[s][b_org_rptr[s]];
+            b_hsk[s]      = 1'b0;
+            ar_gnt_src[s] = '0;
+            ar_gnt_vld[s] = 1'b0;
+            ar_hsk[s]     = 1'b0;
+            r_org[s]      = r_org_mem[s][r_org_rptr[s]];
+            r_hsk_last[s] = 1'b0;
+        end
+
+        // Route AW: lowest-index master wins, only if W path free and B FIFO has room
+        for (int unsigned s = 0; s < NM_SLV; s++) begin
+            if (!w_busy_q[s] && (b_org_cnt[s] < OUTSTAND)) begin
+                for (int unsigned m = 0; m < NM_MST; m++) begin
+                    if (!aw_gnt_vld[s] && slv_aw_valid[m] &&
+                        (decode_addr(slv_aw_addr[m]) == s)) begin
+                        aw_gnt_vld[s]    = 1'b1;
+                        aw_gnt_src[s]    = m[MIDX_W-1:0];
+                        mst_aw_valid[s]  = 1'b1;
+                        mst_aw_addr[s]   = slv_aw_addr[m];
+                        mst_aw_len[s]    = slv_aw_len[m];
+                        mst_aw_size[s]   = slv_aw_size[m];
+                        mst_aw_burst[s]  = slv_aw_burst[m];
+                        mst_aw_lock[s]   = slv_aw_lock[m];
+                        mst_aw_cache[s]  = slv_aw_cache[m];
+                        mst_aw_prot[s]   = slv_aw_prot[m];
+                        mst_aw_qos[s]    = slv_aw_qos[m];
+                        mst_aw_region[s] = slv_aw_region[m];
+                        mst_aw_atop[s]   = slv_aw_atop[m];
+                        slv_aw_ready[m]  = mst_aw_ready[s];
+                    end
                 end
+                aw_hsk[s] = mst_aw_valid[s] && mst_aw_ready[s];
             end
         end
 
-        // Route W transactions (broadcast eligible)
-        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-            if (slv_w_valid[m]) begin
-                for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                    mst_w_valid[s] = 1'b1;
-                    mst_w_data[s] = slv_w_data[m];
-                    mst_w_strb[s] = slv_w_strb[m];
-                    mst_w_last[s] = slv_w_last[m];
-                end
-                for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                    slv_w_ready[m] |= mst_w_ready[s];
-                end
+        // Route W: locked to the master that owns the in-flight write burst
+        for (int unsigned s = 0; s < NM_SLV; s++) begin
+            if (w_busy_q[s]) begin
+                mst_w_valid[s]          = slv_w_valid[w_src_q[s]];
+                mst_w_data[s]           = slv_w_data[w_src_q[s]];
+                mst_w_strb[s]           = slv_w_strb[w_src_q[s]];
+                mst_w_last[s]           = slv_w_last[w_src_q[s]];
+                slv_w_ready[w_src_q[s]] = mst_w_ready[s];
+                w_hsk_last[s] = mst_w_valid[s] && mst_w_ready[s] && mst_w_last[s];
             end
         end
 
-        // Route B responses back to originating master
-        for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-            if (mst_b_valid[s]) begin
-                for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
+        // Route B: only to the originating master, arbitrated per master port
+        for (int unsigned m = 0; m < NM_MST; m++) begin
+            for (int unsigned s = 0; s < NM_SLV; s++) begin
+                if (!slv_b_valid[m] && mst_b_valid[s] &&
+                    (b_org_cnt[s] != 0) && (b_org[s] == m[MIDX_W-1:0])) begin
                     slv_b_valid[m] = 1'b1;
-                    slv_b_resp[m] = mst_b_resp[s];
+                    slv_b_resp[m]  = mst_b_resp[s];
                     mst_b_ready[s] = slv_b_ready[m];
+                    b_hsk[s]       = mst_b_valid[s] && mst_b_ready[s];
                 end
             end
         end
 
-        // Route AR transactions by address
-        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-            if (slv_ar_valid[m]) begin
-                int unsigned target = decode_addr(slv_ar_addr[m]);
-                if (target < Cfg.NoMstPorts) begin
-                    mst_ar_valid[target] = 1'b1;
-                    mst_ar_addr[target] = slv_ar_addr[m];
-                    mst_ar_len[target] = slv_ar_len[m];
-                    mst_ar_size[target] = slv_ar_size[m];
-                    mst_ar_burst[target] = slv_ar_burst[m];
-                    mst_ar_lock[target] = slv_ar_lock[m];
-                    mst_ar_cache[target] = slv_ar_cache[m];
-                    mst_ar_prot[target] = slv_ar_prot[m];
-                    mst_ar_qos[target] = slv_ar_qos[m];
-                    mst_ar_region[target] = slv_ar_region[m];
-                    slv_ar_ready[m] = mst_ar_ready[target];
+        // Route AR: lowest-index master wins, only if R FIFO has room
+        for (int unsigned s = 0; s < NM_SLV; s++) begin
+            if (r_org_cnt[s] < OUTSTAND) begin
+                for (int unsigned m = 0; m < NM_MST; m++) begin
+                    if (!ar_gnt_vld[s] && slv_ar_valid[m] &&
+                        (decode_addr(slv_ar_addr[m]) == s)) begin
+                        ar_gnt_vld[s]    = 1'b1;
+                        ar_gnt_src[s]    = m[MIDX_W-1:0];
+                        mst_ar_valid[s]  = 1'b1;
+                        mst_ar_addr[s]   = slv_ar_addr[m];
+                        mst_ar_len[s]    = slv_ar_len[m];
+                        mst_ar_size[s]   = slv_ar_size[m];
+                        mst_ar_burst[s]  = slv_ar_burst[m];
+                        mst_ar_lock[s]   = slv_ar_lock[m];
+                        mst_ar_cache[s]  = slv_ar_cache[m];
+                        mst_ar_prot[s]   = slv_ar_prot[m];
+                        mst_ar_qos[s]    = slv_ar_qos[m];
+                        mst_ar_region[s] = slv_ar_region[m];
+                        slv_ar_ready[m]  = mst_ar_ready[s];
+                    end
                 end
+                ar_hsk[s] = mst_ar_valid[s] && mst_ar_ready[s];
             end
         end
 
-        // Route R responses back to all masters
-        for (int unsigned m = 0; m < Cfg.NoSlvPorts; m++) begin
-            for (int unsigned s = 0; s < Cfg.NoMstPorts; s++) begin
-                if (mst_r_valid[s]) begin
+        // Route R: only to the originating master, arbitrated per master port
+        for (int unsigned m = 0; m < NM_MST; m++) begin
+            for (int unsigned s = 0; s < NM_SLV; s++) begin
+                if (!slv_r_valid[m] && mst_r_valid[s] &&
+                    (r_org_cnt[s] != 0) && (r_org[s] == m[MIDX_W-1:0])) begin
                     slv_r_valid[m] = 1'b1;
-                    slv_r_data[m] = mst_r_data[s];
-                    slv_r_resp[m] = mst_r_resp[s];
-                    slv_r_last[m] = mst_r_last[s];
-                    mst_r_ready[s] |= slv_r_ready[m];
+                    slv_r_data[m]  = mst_r_data[s];
+                    slv_r_resp[m]  = mst_r_resp[s];
+                    slv_r_last[m]  = mst_r_last[s];
+                    mst_r_ready[s] = slv_r_ready[m];
+                    r_hsk_last[s]  = mst_r_valid[s] && mst_r_ready[s] && mst_r_last[s];
                 end
+            end
+        end
+    end
+
+    // =========================================================================
+    // Origin-FIFO and write-lock state (sequential)
+    // =========================================================================
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
+            for (int unsigned s = 0; s < NM_SLV; s++) begin
+                w_busy_q[s]   <= 1'b0;
+                w_src_q[s]    <= '0;
+                b_org_wptr[s] <= '0;
+                b_org_rptr[s] <= '0;
+                b_org_cnt[s]  <= '0;
+                r_org_wptr[s] <= '0;
+                r_org_rptr[s] <= '0;
+                r_org_cnt[s]  <= '0;
+            end
+        end else begin
+            for (int unsigned s = 0; s < NM_SLV; s++) begin
+                // Write-burst ownership lock
+                if (aw_hsk[s]) begin
+                    w_busy_q[s] <= 1'b1;
+                    w_src_q[s]  <= aw_gnt_src[s];
+                end else if (w_hsk_last[s]) begin
+                    w_busy_q[s] <= 1'b0;
+                end
+
+                // B origin FIFO push (on AW accept) / pop (on B accept)
+                if (aw_hsk[s]) begin
+                    b_org_mem[s][b_org_wptr[s]] <= aw_gnt_src[s];
+                    b_org_wptr[s] <= b_org_wptr[s] + 1'b1;
+                end
+                if (b_hsk[s]) begin
+                    b_org_rptr[s] <= b_org_rptr[s] + 1'b1;
+                end
+                b_org_cnt[s] <= b_org_cnt[s] + (aw_hsk[s] ? 1 : 0) - (b_hsk[s] ? 1 : 0);
+
+                // R origin FIFO push (on AR accept) / pop (on R last accept)
+                if (ar_hsk[s]) begin
+                    r_org_mem[s][r_org_wptr[s]] <= ar_gnt_src[s];
+                    r_org_wptr[s] <= r_org_wptr[s] + 1'b1;
+                end
+                if (r_hsk_last[s]) begin
+                    r_org_rptr[s] <= r_org_rptr[s] + 1'b1;
+                end
+                r_org_cnt[s] <= r_org_cnt[s] + (ar_hsk[s] ? 1 : 0) - (r_hsk_last[s] ? 1 : 0);
             end
         end
     end
