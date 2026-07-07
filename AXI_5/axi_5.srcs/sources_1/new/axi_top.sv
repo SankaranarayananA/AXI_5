@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "axi_project_defines.svh"
 //////////////////////////////////////////////////////////////////////////////////
 // Company:
 // Engineer:
@@ -602,13 +603,12 @@ module axi_xbar_intf #(
 endmodule
 
 module axi_top #(
-    // Keep standalone synthesis defaults small enough for medium FPGA packages.
-    // Simulation/testbench can and does override these parameters explicitly.
-    parameter int unsigned NUM_MASTERS    = 1,
-    parameter int unsigned NUM_SLAVES     = 1,
-    parameter int unsigned AXI_ADDR_WIDTH = 8,
-    parameter int unsigned AXI_DATA_WIDTH = 8,
-    parameter int unsigned AXI_ID_WIDTH   = 1
+    // Shared defaults are defined in axi_project_defines.svh.
+    parameter int unsigned NUM_MASTERS    = `AXI_TOP_DEFAULT_NUM_MASTERS,
+    parameter int unsigned NUM_SLAVES     = `AXI_TOP_DEFAULT_NUM_SLAVES,
+    parameter int unsigned AXI_ADDR_WIDTH = `AXI_TOP_DEFAULT_ADDR_WIDTH,
+    parameter int unsigned AXI_DATA_WIDTH = `AXI_TOP_DEFAULT_DATA_WIDTH,
+    parameter int unsigned AXI_ID_WIDTH   = `AXI_TOP_DEFAULT_ID_WIDTH
 ) (
     input  logic clk_i,
     input  logic rst_ni,

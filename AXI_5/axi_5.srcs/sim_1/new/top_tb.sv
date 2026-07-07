@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-`include "tb_defines.svh"
+`include "../../sources_1/new/axi_project_defines.svh"
 `include "uvm_pkg.sv"
 `include "axi_uvm_ral_pkg.sv"
 `include "axi_uvm_seq_pkg.sv"
