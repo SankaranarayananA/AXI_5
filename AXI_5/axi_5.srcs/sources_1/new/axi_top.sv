@@ -602,11 +602,13 @@ module axi_xbar_intf #(
 endmodule
 
 module axi_top #(
-    parameter int unsigned NUM_MASTERS    = 2,
-    parameter int unsigned NUM_SLAVES     = 2,
-    parameter int unsigned AXI_ADDR_WIDTH = 32,
-    parameter int unsigned AXI_DATA_WIDTH = 64,
-    parameter int unsigned AXI_ID_WIDTH   = 4
+    // Keep standalone synthesis defaults small enough for medium FPGA packages.
+    // Simulation/testbench can and does override these parameters explicitly.
+    parameter int unsigned NUM_MASTERS    = 1,
+    parameter int unsigned NUM_SLAVES     = 1,
+    parameter int unsigned AXI_ADDR_WIDTH = 8,
+    parameter int unsigned AXI_DATA_WIDTH = 8,
+    parameter int unsigned AXI_ID_WIDTH   = 1
 ) (
     input  logic clk_i,
     input  logic rst_ni,
