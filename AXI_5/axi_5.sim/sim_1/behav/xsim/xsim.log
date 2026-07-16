@@ -1,0 +1,50 @@
+#-----------------------------------------------------------
+# xsim v2024.1 (64-bit)
+# SW Build 5076996 on Wed May 22 18:37:14 MDT 2024
+# IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
+# SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
+# Start of session at: Wed Jul 15 20:21:10 2026
+# Process ID: 22696
+# Current directory: C:/Users/sankaran/Documents/lclPrj/AXI_5/AXI_5/axi_5.sim/sim_1/behav/xsim
+# Command line: xsim.exe -mode tcl -source {xsim.dir/top_tb_behav/xsim_script.tcl}
+# Log file: C:/Users/sankaran/Documents/lclPrj/AXI_5/AXI_5/axi_5.sim/sim_1/behav/xsim/xsim.log
+# Journal file: C:/Users/sankaran/Documents/lclPrj/AXI_5/AXI_5/axi_5.sim/sim_1/behav/xsim\xsim.jou
+# Running On        :soc-5CG5385D5G
+# Platform          :Windows Server 2016 or Windows 10
+# Operating System  :26200
+# Processor Detail  :Intel(R) Core(TM) Ultra 7 265U
+# CPU Frequency     :3379 MHz
+# CPU Physical cores:12
+# CPU Logical cores :14
+# Host memory       :33751 MB
+# Swap memory       :5100 MB
+# Total Virtual     :38852 MB
+# Available Virtual :12901 MB
+#-----------------------------------------------------------
+source xsim.dir/top_tb_behav/xsim_script.tcl
+# xsim {top_tb_behav} -autoloadwcfg -tclbatch {_probe_xsim.tcl}
+Time resolution is 1 ps
+source _probe_xsim.tcl
+## puts "PROBE_START"
+PROBE_START
+## foreach c {write_wave_image save_wave_config current_wave_config add_wave get_waves zoom_fit write_bmp write_png export_wave_image write_waveform} {
+##     puts [format "CMD %-22s : %s" $c [expr {[llength [info commands $c]] ? "EXISTS" : "missing"}]]
+## }
+CMD write_wave_image       : missing
+CMD save_wave_config       : EXISTS
+CMD current_wave_config    : EXISTS
+CMD add_wave               : EXISTS
+CMD get_waves              : EXISTS
+CMD zoom_fit               : missing
+CMD write_bmp              : missing
+CMD write_png              : missing
+CMD export_wave_image      : missing
+CMD write_waveform         : missing
+## puts "WAVEMATCH [lsort [info commands *wave*]]"
+WAVEMATCH add_wave add_wave_divider add_wave_group add_wave_marker add_wave_virtual_bus close_wave_config create_wave_config current_wave_config find_next_wave_value get_wave_configs get_waves log_wave move_wave open_wave_config open_wave_database remove_wave report_wave_props resume_wave_config_updates save_wave_config select_wave_objects set_wave_prop suspend_wave_config_updates
+## puts "IMAGEMATCH [lsort [info commands *image*]]"
+IMAGEMATCH 
+## puts "PROBE_END"
+PROBE_END
+## quit
+INFO: [Common 17-206] Exiting xsim at Wed Jul 15 20:21:12 2026...
